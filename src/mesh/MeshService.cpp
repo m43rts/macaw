@@ -18,6 +18,9 @@
 #include "meshUtils.h"
 #include "modules/NodeInfoModule.h"
 #include "modules/PositionModule.h"
+#if !MESHTASTIC_EXCLUDE_DECOY
+#include "modules/DecoyModule.h"
+#endif
 #include "modules/RoutingModule.h"
 #include "power.h"
 #include <assert.h>
@@ -249,6 +252,12 @@ void MeshService::sendToMesh(meshtastic_MeshPacket *p, RxSource src, bool ccToPh
 {
     uint32_t mesh_packet_id = p->id;
     nodeDB->updateFrom(*p); // update our local DB for this packet (because phone might have sent position packets etc...)
+
+#if !MESHTASTIC_EXCLUDE_DECOY
+    if (src == RX_SRC_USER && decoyModule) {
+        decoyModule->onUserPacketSent(p);
+    }
+#endif
 
     // Note: We might return !OK if our fifo was full, at that point the only option we have is to drop it
     ErrorCode res = router->sendLocal(p, src);
