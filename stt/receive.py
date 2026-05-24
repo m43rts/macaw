@@ -99,19 +99,26 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         sys.exit("GEMINI_API_KEY is not set.")
-    
+    serial_path = os.environ.get("SERIAL_PATH")
+    if index is None and not serial_path:
+        sys.exit("SERIAL_PATH is not set.")
+
     # Get sentence
     if index is None:
         received = None
-        with serial.Serial("/dev/ttyUSB0", 115200, timeout=1) as ser:
+        with serial.Serial(serial_path, 115200, timeout=1) as ser:
             looping = True
             while looping:
                 try:
                     received = lora.read_lora(ser, timeout=30)
                     print(f"> {received}")
-                    looping = False
+                    if received is not None:
+                        looping = False
                 except Exception as e:
                     print(e)
+                except KeyboardInterrupt as e:
+                    print("Exiting!")
+                    sys.exit(0)
         
         code = int(received)
         sentence = load_entry(code, lang)

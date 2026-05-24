@@ -95,6 +95,9 @@ def main():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         sys.exit("GEMINI_API_KEY is not set.")
+    serial_path = os.environ.get("SERIAL_PATH")
+    if not serial_path:
+        sys.exit("SERIAL_PATH is not set.")
     client = genai.Client(api_key=api_key)
     dictionary = load_dictionary()
 
@@ -110,7 +113,7 @@ def main():
     print("\n--- Decoded ---")
     print(decoded)
     
-    with serial.Serial("/dev/ttyUSB0", 115200, timeout=1) as ser:
+    with serial.Serial(serial_path, 115200, timeout=1) as ser:
         lora.send_lora(ser, '5')
 
 
