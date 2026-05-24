@@ -44,6 +44,8 @@ volatile bool rxFlag = false;
 uint64_t tx_time;
  
 void setup() {
+  Serial.begin(115200);
+  while (!Serial && millis() < 3000) { delay(10); }
   heltec_setup();
   both.println("Radio init");
   RADIOLIB_OR_HALT(radio.begin());
