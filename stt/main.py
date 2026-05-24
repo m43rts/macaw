@@ -60,14 +60,19 @@ def transcribe(client: genai.Client, wav_bytes: bytes) -> str:
 
 def translate(client: genai.Client, transcript: str, dictionary: list[str]) -> str:
     prompt = (
-        "Rewrite the message below using ONLY words from the allowed dictionary. "
-        "Drop any concept that cannot be expressed with these words. "
-        "Do not invent, inflect, or substitute words outside the list. However the input can be composed of Dutch, French, or English versions of the words found in the provided English dictionnary."
-        "Output only the rewritten message, no preamble, no explanation.\n\n"
-        "Allowed dictionary (one word per line):\n"
-        f"{chr(10).join(dictionary)}\n\n"
-        "Message:\n"
-        f"{transcript}"
+        f'''
+        The following message is the result of a speech to text process. The original speech contained words
+        from French, Dutch, and/or English. The transcript is not perfect and certainly contains mismatches
+        of words or even lacking words. Your task is to pick a sentence from the list below that could match
+        what the original speech wanted to transmit. Your output will be ONLY the number of the sentence that
+        match, 0 otherwise. 
+        
+        Sentence list:
+        {"\n".join([f"{i + 1}. {dictionary[i]}" for i in range(len(dictionary))])}
+        
+        Speech transcript:
+        {transcript}
+        '''
     )
     print(f"Translating against {len(dictionary)}-word dictionary...")
     response = client.models.generate_content(model=MODEL, contents=prompt)

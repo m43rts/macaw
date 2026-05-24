@@ -1,45 +1,10 @@
-On position
-This is
-Eyes on target
-No movements
-Apparently
-Target
-
-Now
-One
-Two
-Three
-Four
-Five
-Six
-Seven
-Eight
-Nine
-Ten
-
-Alfa
-November
-Bravo
-Oscar
-Charlie
-Papa
-Delta
-Quebec
-Echo
-Romeo
-Foxtrot
-Sierra
-Golf
-Tango
-Hotel
-Uniform
-India
-Victor
-Juliett
-Whiskey
-Kilo
-Xray
-Lima
-Yankee
-Mike
-Zulu 
+Arrivé en position
+Pas de mouvements apparents
+Vue sur l'objectif
+Véhicule garé à proximité
+Mouvements de sentinelle observés
+Arrivée de véhicule
+Départ de véhicule
+Véhicule en mouvement
+Cible reconnue
+Cible arrivée
