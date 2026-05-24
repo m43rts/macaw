@@ -58,9 +58,9 @@ def transcribe(client: genai.Client, wav_bytes: bytes) -> str:
     return (response.text or "").strip()
 
 
-def translate(client: genai.Client, transcript: str, dictionary: list[str]) -> str:
+def decode(client: genai.Client, transcript: str, dictionary: list[str]) -> int:
     prompt = (
-        f'''
+        f"""
         The following message is the result of a speech to text process. The original speech contained words
         from French, Dutch, and/or English. The transcript is not perfect and certainly contains mismatches
         of words or even lacking words. Your task is to pick a sentence from the list below that could match
@@ -72,11 +72,15 @@ def translate(client: genai.Client, transcript: str, dictionary: list[str]) -> s
         
         Speech transcript:
         {transcript}
-        '''
+        """
     )
-    print(f"Translating against {len(dictionary)}-word dictionary...")
+    print(f"Translating against {len(dictionary)} entries dictionary...")
     response = client.models.generate_content(model=MODEL, contents=prompt)
-    return (response.text or "").strip()
+    try:
+        code = int(response.text)
+        assert(10 <= code <= len(dictionary))
+    except Exception:
+        raise RuntimeError("LLM IS NOT RESPECTING THE RULES")
 
 
 def main():
@@ -94,9 +98,9 @@ def main():
     print("\n--- Transcript ---")
     print(transcript)
 
-    translated = translate(client, transcript, dictionary)
-    print("\n--- Translated ---")
-    print(translated)
+    decoded = decode(client, transcript, dictionary)
+    print("\n--- Decoded ---")
+    print(decoded)
 
 
 if __name__ == "__main__":
