@@ -109,35 +109,39 @@ def main():
     if index is None and not serial_path:
         sys.exit("SERIAL_PATH is not set.")
 
-    # Get sentence
-    if index is None:
-        received = None
+    client = genai.Client(api_key=api_key)
+
+    # Single-shot mode: speak the given index and exit.
+    if index is not None:
+        sentence = load_entry(index, lang)
+        try:
+            speak(client, sentence)
+        except Exception as e:
+            print(f"[TTS failed: {e}]", file=sys.stderr)
+            sys.exit(1)
+        return
+
+    # Receive loop: keep listening until Ctrl+C.
+    try:
         with serial.Serial(serial_path, 115200, timeout=1) as ser:
-            looping = True
-            while looping:
+            while True:
                 try:
                     received = lora.read_lora(ser, timeout=30)
-                    print(f"> {received}")
-                    if received is not None:
-                        looping = False
                 except Exception as e:
                     print(e)
-                except KeyboardInterrupt as e:
-                    print("Exiting!")
-                    sys.exit(0)
-        
-        code = int(received)
-        sentence = load_entry(code, lang)
-    else:
-        sentence = load_entry(index, lang)
-    
-    # Speak
-    try:
-        client = genai.Client(api_key=api_key)
-        speak(client, sentence)
-    except Exception as e:
-        print(f"[TTS failed: {e}]", file=sys.stderr)
-        sys.exit(1)
+                    continue
+                if received is None:
+                    continue
+                print(f"> {received}")
+                try:
+                    code = int(received)
+                    sentence = load_entry(code, lang)
+                    speak(client, sentence)
+                except Exception as e:
+                    print(f"[TTS failed: {e}]", file=sys.stderr)
+    except KeyboardInterrupt:
+        print("Exiting!")
+        sys.exit(0)
 
 
 if __name__ == "__main__":
