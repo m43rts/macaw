@@ -5,12 +5,15 @@ import sys
 import tempfile
 from pathlib import Path
 
+import yaml
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
 SAMPLE_RATE = 16000
-MODEL = "gemini-2.5-flash"
-DICTIONARY_PATH = Path(__file__).parent / "dictionary.txt"
+MODEL_TRANSCRIBE = "gemini-2.5-pro"
+MODEL_DECODE = "gemini-2.5-flash"
+DICTIONARY_PATH = Path(__file__).parent / "dictionary.yaml"
 
 
 def record_until_enter() -> bytes:
@@ -41,15 +44,15 @@ def record_until_enter() -> bytes:
 
 def load_dictionary() -> list[str]:
     if not DICTIONARY_PATH.exists():
-        sys.exit(f"Dictionary not found at {DICTIONARY_PATH}.")
-    words = [line.strip() for line in DICTIONARY_PATH.read_text().splitlines()]
-    return [w for w in words if w]
+        sys.exit(f"Dictionary not found at {DICTIONARY_PATH}. Run generate_translations.py first.")
+    entries = yaml.safe_load(DICTIONARY_PATH.read_text())
+    return [e["fr"] for e in entries]
 
 
 def transcribe(client: genai.Client, wav_bytes: bytes) -> str:
-    print(f"Sending {len(wav_bytes) / 1024:.1f} KB to {MODEL} for transcription...")
+    print(f"Sending {len(wav_bytes) / 1024:.1f} KB to {MODEL_TRANSCRIBE} for transcription...")
     response = client.models.generate_content(
-        model=MODEL,
+        model=MODEL_TRANSCRIBE,
         contents=[
             "Transcribe the following audio verbatim. Output only the transcript, no preamble.",
             types.Part.from_bytes(data=wav_bytes, mime_type="audio/wav"),
@@ -65,25 +68,27 @@ def decode(client: genai.Client, transcript: str, dictionary: list[str]) -> int:
         from French, Dutch, and/or English. The transcript is not perfect and certainly contains mismatches
         of words or even lacking words. Your task is to pick a sentence from the list below that could match
         what the original speech wanted to transmit. Your output will be ONLY the number of the sentence that
-        match, 0 otherwise. 
-        
+        match, 0 otherwise.
+
         Sentence list:
         {"\n".join([f"{i + 1}. {dictionary[i]}" for i in range(len(dictionary))])}
-        
+
         Speech transcript:
         {transcript}
         """
     )
-    print(f"Translating against {len(dictionary)} entries dictionary...")
-    response = client.models.generate_content(model=MODEL, contents=prompt)
+    print(f"Decoding against {len(dictionary)} entries dictionary with {MODEL_DECODE}...")
+    response = client.models.generate_content(model=MODEL_DECODE, contents=prompt)
     try:
-        code = int(response.text)
-        assert(10 <= code <= len(dictionary))
+        code = int((response.text or "").strip())
+        assert 0 <= code <= len(dictionary)
     except Exception:
-        raise RuntimeError("LLM IS NOT RESPECTING THE RULES")
+        raise RuntimeError(f"LLM did not return a valid index, got: {response.text!r}")
+    return code
 
 
 def main():
+    load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         sys.exit("GEMINI_API_KEY is not set.")
