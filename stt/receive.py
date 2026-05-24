@@ -126,7 +126,7 @@ def main():
         with serial.Serial(serial_path, 115200, timeout=1) as ser:
             while True:
                 try:
-                    received = lora.read_lora(ser, timeout=30)
+                    received = lora.read_lora(ser, timeout=10)
                 except Exception as e:
                     print(e)
                     continue
