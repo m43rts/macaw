@@ -6,7 +6,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from . import lora_serial as lora
+import lora_serial as lora
 
 import yaml
 from dotenv import load_dotenv
@@ -114,7 +114,7 @@ def main():
     print(decoded)
     
     with serial.Serial(serial_path, 115200, timeout=1) as ser:
-        lora.send_lora(ser, '5')
+        lora.send_lora(ser, f'{decoded}')
 
 
 if __name__ == "__main__":
