@@ -4,7 +4,8 @@ Vue sur l'objectif
 Véhicule garé à proximité
 Mouvements de sentinelle observés
 Arrivée de véhicule
-Départ de véhicule
 Véhicule en mouvement
 Cible reconnue
 Cible arrivée
+Détection de drones au dessus de ma position
+Position compromise, je me déplace vers la position secondaire

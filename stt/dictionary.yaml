@@ -3,28 +3,31 @@
   nl: In positie
 - fr: Pas de mouvements apparents
   en: No apparent movement
-  nl: Geen duidelijke bewegingen
+  nl: Geen zichtbare beweging
 - fr: Vue sur l'objectif
-  en: View on target
-  nl: Zicht op het doelwit
+  en: Visual on target
+  nl: Zicht op doelwit
 - fr: Véhicule garé à proximité
   en: Vehicle parked nearby
   nl: Voertuig in de buurt geparkeerd
 - fr: Mouvements de sentinelle observés
-  en: Sentry movements observed
-  nl: Bewegingen van schildwacht waargenomen
+  en: Sentry movement observed
+  nl: Schildwachtbewegingen waargenomen
 - fr: Arrivée de véhicule
   en: Vehicle arrival
   nl: Aankomst voertuig
-- fr: Départ de véhicule
-  en: Vehicle departure
-  nl: Vertrek voertuig
 - fr: Véhicule en mouvement
-  en: Vehicle in motion
+  en: Vehicle moving
   nl: Voertuig in beweging
 - fr: Cible reconnue
   en: Target identified
-  nl: Doelwit herkend
+  nl: Doelwit geïdentificeerd
 - fr: Cible arrivée
   en: Target arrived
   nl: Doelwit aangekomen
+- fr: Détection de drones au dessus de ma position
+  en: Drones detected over position
+  nl: Drones gedetecteerd boven mijn positie
+- fr: Position compromise, je me déplace vers la position secondaire
+  en: Position compromised, moving to secondary position
+  nl: Positie gecompromitteerd, verplaats naar secundaire positie
