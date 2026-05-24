@@ -1,10 +1,12 @@
 import os
+import serial
 import struct
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
 
+import lora_serial as lora
 import yaml
 from dotenv import load_dotenv
 from google import genai
@@ -18,20 +20,25 @@ TTS_SAMPLE_RATE = 24000
 
 
 def usage():
-    sys.exit(f"Usage: receive.py <index> <lang>  (lang in {{{','.join(LANGS)}}})")
+    sys.exit(f"Usage: receive.py <lang> <index> (lang in {{{','.join(LANGS)}}})")
 
 
-def parse_args(argv: list[str]) -> tuple[int, str]:
-    if len(argv) != 3:
+def parse_args(argv: list[str]) -> tuple[str, int | None]:
+    if len(argv) > 3 or len(argv) < 2:
         usage()
+    
+    index = None
     try:
-        index = int(argv[1])
+        if len(argv) == 3:
+            index = int(argv[2])
     except ValueError:
         usage()
-    lang = argv[2].lower()
+        
+    lang = argv[1].lower()
     if lang not in LANGS:
         sys.exit(f"Unknown language {lang!r}. Expected one of: {', '.join(LANGS)}.")
-    return index, lang
+        
+    return lang, index
 
 
 def load_entry(index: int, lang: str) -> str:
@@ -86,16 +93,34 @@ def speak(client: genai.Client, text: str) -> None:
 
 
 def main():
-    index, lang = parse_args(sys.argv)
-    sentence = load_entry(index, lang)
-    print(sentence)
-
+    # Parse arguments
+    lang, index = parse_args(sys.argv)
     load_dotenv()
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         sys.exit("GEMINI_API_KEY is not set.")
-    client = genai.Client(api_key=api_key)
+    
+    # Get sentence
+    if index is None:
+        received = None
+        with serial.Serial("/dev/ttyUSB0", 115200, timeout=1) as ser:
+            looping = True
+            while looping:
+                try:
+                    received = lora.read_lora(ser, timeout=30)
+                    print(f"> {received}")
+                    looping = False
+                except Exception as e:
+                    print(e)
+        
+        code = int(received)
+        sentence = load_entry(code, lang)
+    else:
+        sentence = load_entry(index, lang)
+    
+    # Speak
     try:
+        client = genai.Client(api_key=api_key)
         speak(client, sentence)
     except Exception as e:
         print(f"[TTS failed: {e}]", file=sys.stderr)

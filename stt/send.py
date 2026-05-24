@@ -1,9 +1,12 @@
 import os
+import serial
 import signal
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+from . import lora_serial as lora
 
 import yaml
 from dotenv import load_dotenv
@@ -106,6 +109,9 @@ def main():
     decoded = decode(client, transcript, dictionary)
     print("\n--- Decoded ---")
     print(decoded)
+    
+    with serial.Serial("/dev/ttyUSB0", 115200, timeout=1) as ser:
+        lora.send_lora(ser, '5')
 
 
 if __name__ == "__main__":
