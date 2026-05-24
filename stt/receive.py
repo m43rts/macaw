@@ -87,7 +87,13 @@ def speak(client: genai.Client, text: str) -> None:
         tmp.write(wav)
         path = tmp.name
     try:
-        subprocess.run(["aplay", "-q", path], check=True)
+        if sys.platform == "win32":
+            subprocess.run(
+                ["powershell", "-NoProfile", "-Command", f"(New-Object Media.SoundPlayer '{path}').PlaySync()"],
+                check=True,
+            )
+        else:
+            subprocess.run(["aplay", "-q", path], check=True)
     finally:
         os.unlink(path)
 
