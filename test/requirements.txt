@@ -1,0 +1,9 @@
+faster-whisper
+gTTS
+rapidfuzz
+librosa
+soundfile
+numpy
+matplotlib
+tqdm
+numba>=0.61
